@@ -1,0 +1,15 @@
+{
+  "name": "@vino/module-a",
+  "version": "1.0.0",
+  "main": "index.js",
+  "module": "dist/module-a.esm-bundler.js",
+  "buildOptions": {
+    "name": "VinoModuleA",
+    "formats": [
+      "cjs",
+      "esm-bundler",
+      "global"
+    ]
+  },
+  "license": "MIT"
+}
