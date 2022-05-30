@@ -1,26 +1,84 @@
-# yarn
+# pnpm
 
-通过 yarn 方式管理 monorepo 项目，并且通过 rollup 打包
+通过 pnpm 方式管理 monorepo 项目，并且通过 rollup 打包
 
-1. 配置项目根目录的 package.json
+## 关于 pnpm 使用
 
-```json
-   "workspaces": {
-        "packages": [
-            "packages/*"
-        ]
-    }
+1. 初始化项目
+
+```bash
+pnpm init -y
 ```
 
-此时通过 `yarn install`，则会把 packages 目录下的所有包都创建个软链，放到了根目录的 node_modules 中。这时候在 module-b 中引入 module-a ，直接写：
+2. 安装依赖
+
+```bash
+# -w 在根目录全局安装依赖
+pnpm install vue -w
+
+# 安装到本地 devDependencies 中
+pnpm install typescript -D
+
+# 1. 安装局部依赖(在项目根目录执行)
+pnpm install vue -r --filter @vino/module-a @vino/module-b
+# 2. 安装局部依赖（在局部目录执行：cd packages/module-a）
+pnpm install vue
+```
+
+## 回到本案例
+
+1. 初始化项目
+
+```bash
+pnpm init -y
+```
+
+2. 创建 pnpm-workspace.yaml 文件
+
+```yaml
+packages:
+  - 'packages/*'
+```
+
+3. 在 module-b 中添加依赖 module-a
+
+```bash
+pnpm install @vino/module-a -r --filter @vino/module-b
+```
+
+这时候发现 @vino/module-b 中的 package.json 文件产生了以下变化：
+
+```json
+"dependencies": {
+    "@vino/module-a": "workspace:^1.0.0"
+}
+```
+
+这时你会有一个疑问：当这样的工具包被发布到平台后，如何识别其中的 workspace 呢？
+
+实际上，当执行了 pnpm publish 后，会把基于的 workspace 的依赖变成外部依赖，如：
+
+```json
+// before
+"dependencies": {
+    "@vino/module-a": "workspace:^1.0.0"
+}
+
+// after
+"dependencies": {
+    "@vino/module-a": "^1.0.0"
+}
+```
+
+这时候在 module-b 中使用 module-a ，直接写：
 
 ```js
 import aFn from '@vino/module-a';
 ```
 
-不需要在 module-b 中执行 `yarn install @vino/module-a`。但是如果是 ts 项目，则会报类型错误
+如果是 ts 项目，则会报类型错误
 
-2. 配置 tsconfig.json
+4. 配置 tsconfig.json
 
 ```json
   "compilerOptions": {
@@ -61,8 +119,4 @@ import aFn from '@vino/module-a';
 </script>
 ```
 
-执行 yarn run build 打包时，会读取包的 buildOptions 字段，然后提供给 rollup。
-
-## 特点
-
-方便调试，但不利于多包互相依赖时的管理。发包时候需要整体排查**引用包**和**被引用包**的版本号是否一致。
+执行 pnpm run build 打包时，会读取包的 buildOptions 字段，然后提供给 rollup。

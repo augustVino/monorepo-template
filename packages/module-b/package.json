@@ -10,5 +10,8 @@
       "esm-bundler"
     ]
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@vino/module-a": "workspace:^1.0.0"
+  }
 }
